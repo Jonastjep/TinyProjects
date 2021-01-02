@@ -22,7 +22,7 @@ function draw() {
   }
 
   stroke(255, 100, 0)
-  for(var i = 0; i < rover.sens_arr.length; i++){
+  for (var i = 0; i < rover.sens_arr.length; i++) {
     line(rover.sens_arr[i][0].x, rover.sens_arr[i][0].y, rover.sens_arr[i][1].x, rover.sens_arr[i][1].y)
   }
   stroke(0)
@@ -38,7 +38,11 @@ function draw() {
       rover.collide()
     }
   }
+
+  createAndDrawCutoutShape(50, rover)
+
   strokeWeight(1)
+  stroke(255)
   let dv = p5.Vector.sub(rover.pos, goal.pos);
   text(dv.mag(), 10, 20)
 }
@@ -65,4 +69,22 @@ function keyPressed() {
   if (keyCode == LEFT_ARROW) {
     rover.setRota(-5 * PI / 180)
   }
+}
+
+function createAndDrawCutoutShape(dim, rover) {
+  stroke(255, 0, 0);
+  beginShape();
+  // Exterior part of shape, clockwise winding
+  vertex(0, 0);
+  vertex(width, 0);
+  vertex(width, height);
+  vertex(0, height);
+  // Interior part of shape, counter-clockwise winding
+  beginContour();
+  vertex(rover.pos.x-dim, rover.pos.y-dim)
+  vertex(rover.pos.x-dim, rover.pos.y+dim);
+  vertex(rover.pos.x+dim, rover.pos.y+dim);
+  vertex(rover.pos.x+dim, rover.pos.y-dim);
+  endContour();
+  endShape(CLOSE);
 }
