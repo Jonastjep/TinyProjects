@@ -8,32 +8,42 @@ class Vehicle {
     this.h = 15;
     this.b = 15;
     this.sensRange = 30
-    
+
     this.isGoingFwd = false;
     this.isGoingBwd = false;
     this.rotation = 0;
-    
+
     fill(0, 255, 0);
     //create the collision body vertices
-    this.resetVehPos()
+    this.resetVehPos(angle)
     //create the sensor array vertices
     this.resetSensPos(angle)
   }
-  
-  resetVehPos(){
+
+  resetVehPos(angle) {
+    //Using trig, we calculate how the points creating the vertexes for the rover transform through motion
+    var chCo = 1.4 //chamfer compensation on the rover body
     this.vehi_surr = [
-      createVector(this.pos.x - this.b / 2, this.pos.y - this.b / 2),
-      createVector(this.pos.x + this.b / 2, this.pos.y - this.h / 2),
-      createVector(this.pos.x + this.b / 2, this.pos.y + this.h / 2),
-      createVector(this.pos.x - this.b / 2, this.pos.y + this.h / 2)
+      createVector(this.pos.x - (cos(angle - PI / 4) * chCo * this.b / 2), this.pos.y - (sin(angle - PI / 4) * chCo * this.h / 2)),
+      createVector(this.pos.x - (cos(angle + PI / 4) * chCo * this.b / 2), this.pos.y - (sin(angle + PI / 4) * chCo * this.h / 2)),
+      createVector(this.pos.x + (cos(angle - PI / 4) * chCo * this.b / 2), this.pos.y + (sin(angle - PI / 4) * chCo * this.h / 2)),
+      createVector(this.pos.x + (cos(angle + PI / 4) * chCo * this.b / 2), this.pos.y + (sin(angle + PI / 4) * chCo * this.h / 2)),
     ];
   }
-  
+
   //this function is used at the initial setting and at collision with wall or obstacle
   resetSensPos(angle) {
     //create the distance sensor rays
     //We use trig to find the spot of the two points that will create the vertex. There are five sensors for the moment
     this.sens_arr = [
+      [
+        createVector(this.pos.x - (cos(angle - PI / 2) * this.b / 2), this.pos.y - (sin(angle - PI / 2) * this.h / 2)),
+        createVector(this.pos.x - (cos(angle - PI / 2) * (this.b / 2 + this.sensRange)), this.pos.y - (sin(angle - PI / 2) * (this.h / 2 + this.sensRange)))
+      ],
+      [
+        createVector(this.pos.x - (cos(angle - PI / 4) * this.b / 2), this.pos.y - (sin(angle - PI / 4) * this.h / 2)),
+        createVector(this.pos.x - (cos(angle - PI / 4) * (this.b / 2 + this.sensRange)), this.pos.y - (sin(angle - PI / 4) * (this.h / 2 + this.sensRange)))
+      ],
       [
         createVector(this.pos.x - (cos(angle) * this.b / 2), this.pos.y - (sin(angle) * this.h / 2)),
         createVector(this.pos.x - (cos(angle) * (this.b / 2 + this.sensRange)), this.pos.y - (sin(angle) * (this.h / 2 + this.sensRange)))
@@ -43,16 +53,8 @@ class Vehicle {
         createVector(this.pos.x - (cos(angle + PI / 4) * (this.b / 2 + this.sensRange)), this.pos.y - (sin(angle + PI / 4) * (this.h / 2 + this.sensRange)))
       ],
       [
-        createVector(this.pos.x - (cos(angle - PI / 4) * this.b / 2), this.pos.y - (sin(angle - PI / 4) * this.h / 2)),
-        createVector(this.pos.x - (cos(angle - PI / 4) * (this.b / 2 + this.sensRange)), this.pos.y - (sin(angle - PI / 4) * (this.h / 2 + this.sensRange)))
-      ],
-      [
         createVector(this.pos.x - (cos(angle + PI / 2) * this.b / 2), this.pos.y - (sin(angle + PI / 2) * this.h / 2)),
         createVector(this.pos.x - (cos(angle + PI / 2) * (this.b / 2 + this.sensRange)), this.pos.y - (sin(angle + PI / 2) * (this.h / 2 + this.sensRange)))
-      ],
-      [
-        createVector(this.pos.x - (cos(angle - PI / 2) * this.b / 2), this.pos.y - (sin(angle - PI / 2) * this.h / 2)),
-        createVector(this.pos.x - (cos(angle - PI / 2) * (this.b / 2 + this.sensRange)), this.pos.y - (sin(angle - PI / 2) * (this.h / 2 + this.sensRange)))
       ],
     ];
   }
@@ -65,13 +67,19 @@ class Vehicle {
     var nang = this.vel.heading() + this.rotation
     this.vel = p5.Vector.fromAngle(nang, this.vel.mag())
     this.velP = p5.Vector.fromAngle(nang, this.vel.mag())
-    
-    //TODO :NEED TO MAKE THE COLLISION BODY ROTATE AS WELL!! SAME WAYS AS BELLOW
 
+    //Modifiying the vertices of the rover collision rectangle when rotating
+    for (let i = 0; i < this.vehi_surr.length; i++) {
+      var nangV = this.rotation
+      var inter = createVector(this.vehi_surr[i].x - this.pos.x, this.vehi_surr[i].y - this.pos.y).rotate(nangV)
+
+      this.vehi_surr[i] = p5.Vector.add(inter, this.pos)
+    }
+
+    //Modifiying the vertices of the distance sensors when rotating
     for (let i = 0; i < this.sens_arr.length; i++) {
       for (let j = 0; j < this.sens_arr[i].length; j++) {
-        //We substract pos from the vertexes to translate it to the center, then we make a rotation of the angle
-        // and then we simply add the position back as to replace the vertices to where they should be
+        //We substract pos from the vertexes to translate it to the center, then we make a rotation of the angle and then we simply add the position back as to replace the vertices to where they should be
         var nangS = this.rotation
         var inter = createVector(this.sens_arr[i][j].x - this.pos.x, this.sens_arr[i][j].y - this.pos.y).rotate(nangS)
 
@@ -94,9 +102,7 @@ class Vehicle {
     translate(this.pos.x, this.pos.y)
     rotate(this.vel.heading())
 
-    //Distance sensors
-
-
+    //Rover body
     rectMode(CENTER)
     fill(200, 20, 0)
     this.vehicle = rect(0, 0, this.b, this.h, 5)
@@ -110,12 +116,12 @@ class Vehicle {
 
     } else if (this.isGoingFwd) {
       this.pos.sub(this.vel)
-      
+
       //collision box motion
       for (let i = 0; i < this.vehi_surr.length; i++) {
         this.vehi_surr[i].sub(this.velP)
       }
-      
+
       //sensor array motion
       for (let i = 0; i < this.sens_arr.length; i++) {
         for (let j = 0; j < this.sens_arr[i].length; j++) {
@@ -126,14 +132,25 @@ class Vehicle {
       this.pos.add(this.vel)
     }
     pop()
+
+    // //To see if the shape follows correctly the rover: TROUBLESHOOTING
+    // stroke(2)
+    // fill(0, 255, 0)
+    // beginShape();
+    // for (var v of this.vehi_surr) {
+    //   vertex(v.x, v.y)
+    // }
+    // endShape(CLOSE);
+    // noFill()
+
   }
 
   walls() {
     if (this.pos.x > width || this.pos.x < 0 || this.pos.y > height || this.pos.y < 0) {
       let nPos = createVector(random(width), height - 25)
       this.pos = createVector(nPos.x, nPos.y)
-      
-      this.resetVehPos()
+
+      this.resetVehPos(this.vel.heading())
       this.resetSensPos(this.vel.heading())
     }
   }
@@ -141,12 +158,12 @@ class Vehicle {
   collide() {
     let nPos = createVector(random(width), height - 25)
     this.pos = createVector(nPos.x, nPos.y)
-    this.resetVehPos()
+    this.resetVehPos(this.vel.heading())
     this.resetSensPos(this.vel.heading())
   }
 
-  distObs() {
-
+  distObs(polygVert, sensor) {
+    return polyLine(polygVert, sensor[0].x, sensor[0].y, sensor[1].x, sensor[1].y)
   }
 }
 
