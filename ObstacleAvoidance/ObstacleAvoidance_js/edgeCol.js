@@ -18,11 +18,9 @@ function polyPoint(vertices, px, py) {
 
 function lineLine(x1, y1, x2, y2, x3, y3, x4, y4) {
 
-  // calculate the direction of the lines
   let uA = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1));
   let uB = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1));
 
-  // if uA and uB are between 0-1, lines are colliding
   if (uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1) {
     return true;
   }
@@ -57,15 +55,12 @@ function polyPoly(p1, p2) {
     next = current+1;
     if (next == p1.length) next = 0;
     
-    let vc = p1[current];    // c for "current"
-    let vn = p1[next];       // n for "next"
+    let vc = p1[current];
+    let vn = p1[next];
 
-    // now we can use these two points (a line) to compare
-    // to the other polygon's vertices using polyLine()
     let collision = polyLine(p2, vc.x,vc.y,vn.x,vn.y);
     if (collision) return true;
 
-    // optional: check if the 2nd polygon is INSIDE the first
     collision = polyPoint(p1, p2[0].x, p2[0].y);
     if (collision) return true;
   }

@@ -21,6 +21,12 @@ function draw() {
     rover.collide()
   }
 
+  stroke(255, 100, 0)
+  for(var i = 0; i < rover.sens_arr.length; i++){
+    line(rover.sens_arr[i][0].x, rover.sens_arr[i][0].y, rover.sens_arr[i][1].x, rover.sens_arr[i][1].y)
+  }
+  stroke(0)
+
   rover.update()
   rover.walls()
 
@@ -32,6 +38,7 @@ function draw() {
       rover.collide()
     }
   }
+  strokeWeight(1)
   let dv = p5.Vector.sub(rover.pos, goal.pos);
   text(dv.mag(), 10, 20)
 }
