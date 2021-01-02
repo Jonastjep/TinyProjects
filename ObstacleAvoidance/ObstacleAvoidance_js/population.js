@@ -145,11 +145,10 @@ class Vehicle {
 
   }
 
-  walls() {
-    if (this.pos.x > width || this.pos.x < 0 || this.pos.y > height || this.pos.y < 0) {
+  walls(wallVert) {
+    if (polyPoly(this.vehi_surr, wallVert)) {
       let nPos = createVector(random(width), height - 25)
       this.pos = createVector(nPos.x, nPos.y)
-
       this.resetVehPos(this.vel.heading())
       this.resetSensPos(this.vel.heading())
     }
