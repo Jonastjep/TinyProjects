@@ -81,7 +81,7 @@ class Vehicle {
   }
 
   collide() {
-    nPos = createVector(random(width), height - 25)
+    let nPos = createVector(random(width), height - 25)
     this.pos = createVector(nPos.x, nPos.y)
     this.vehi_surr = [createVector(nPos.x - this.b / 2, nPos.y - this.b / 2),
       createVector(nPos.x + this.b / 2, nPos.y - this.b / 2),
