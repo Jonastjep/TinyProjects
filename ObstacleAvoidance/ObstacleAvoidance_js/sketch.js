@@ -32,6 +32,8 @@ function draw() {
       rover.collide()
     }
   }
+  let dv = p5.Vector.sub(rover.pos, goal.pos);
+  text(dv.mag(), 10, 20)
 }
 
 function keyReleased() {
