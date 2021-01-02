@@ -1,6 +1,8 @@
 let rover
 let obs
 
+var hasArrived = false
+
 function setup() {
   createCanvas(800, 800);
   rover = new Vehicle(random(width), height - 25, random(0, TWO_PI))
@@ -9,6 +11,7 @@ function setup() {
     obs.push(new Obstacle(createVector(random(width), random(100, width - 100))))
   }
   goal = new Goal(pos = createVector(random(width), 18))
+  
 }
 
 function draw() {
@@ -16,9 +19,11 @@ function draw() {
   fill(0)
 
   goal.render()
+  
   arrived = polyPoly(goal.gon, rover.vehi_surr)
   if (arrived) {
     rover.collide()
+    hasArrived = true
   }
 
   stroke(255, 100, 0)
@@ -38,13 +43,18 @@ function draw() {
       rover.collide()
     }
   }
-
-  createAndDrawCutoutShape(50, rover)
+  
+  //Activates the dark mode to simulate what is would be like to be the rover
+  if(!hasArrived){
+    createAndDrawCutoutShape(rover.b+rover.sensRange, rover)
+  }
 
   strokeWeight(1)
   stroke(255)
+  fill(255)
   let dv = p5.Vector.sub(rover.pos, goal.pos);
-  text(dv.mag(), 10, 20)
+  text("Distance: " + str(dv.mag()), 10, 20)
+  fill(0)
 }
 
 function keyReleased() {
