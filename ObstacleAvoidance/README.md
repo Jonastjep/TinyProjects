@@ -1,0 +1,1 @@
+# This is a project in parallel to the Rover project, trying to create a self learning AI for the purpose of obstacle avoidance. This is done with the hel of NEAT (NeuroEvolution of Augmented Topologies).
