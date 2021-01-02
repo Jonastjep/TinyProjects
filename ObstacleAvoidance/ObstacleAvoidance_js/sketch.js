@@ -49,7 +49,7 @@ function draw() {
   for (let ob of obs) {
     for (let i = 0; i < rover.sens_arr.length; i++) {
       if (rover.distObs(ob.vertices, rover.sens_arr[i])) {
-        stroke(150, 150, 0)
+        stroke(0, 100, 200)
         strokeWeight(3)
         line(rover.sens_arr[i][0].x, rover.sens_arr[i][0].y, rover.sens_arr[i][1].x, rover.sens_arr[i][1].y)
         stroke(0)
@@ -58,10 +58,11 @@ function draw() {
       }
     }
   }
-
+  
+  //Checking if the sensors sence the walls
   for (let i = 0; i < rover.sens_arr.length; i++) {
     if (rover.distObs(wallsVert, rover.sens_arr[i])) {
-      stroke(150, 150, 0)
+      stroke(0, 100, 200)
       strokeWeight(3)
       line(rover.sens_arr[i][0].x, rover.sens_arr[i][0].y, rover.sens_arr[i][1].x, rover.sens_arr[i][1].y)
       stroke(0)
