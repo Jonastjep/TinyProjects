@@ -92,10 +92,6 @@ function draw() {
     stroke(2)
     fill(0)
     createAndDrawCutoutShape(rover.b + rover.sensRange, rover)
-  } else {
-    strokeWeight(1)
-    stroke(255)
-    fill(255)
   }
 
   //Measure of the distance between rover and goal
@@ -110,8 +106,8 @@ function draw() {
     }
     text("Distance: " + str(dv.mag()), 10, 20)
   } else {
-    stroke(0)
-    fill(0)
+    stroke(150,0,0)
+    fill(150,0,0)
     for (let i = 0; i < sensRes.length; i++) {
       text("Sensor " + str(i) + " : " + str(sensRes[i]), 10, (i + 2) * 20)
     }
