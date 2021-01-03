@@ -13,11 +13,28 @@ class Vehicle {
     this.isGoingBwd = false;
     this.rotation = 0;
 
-    fill(0, 255, 0);
     //create the collision body vertices
     this.resetVehPos(angle)
     //create the sensor array vertices
     this.resetSensPos(angle)
+
+    //array used to display if the sensors are activated by an obstacle
+    this.sensResutls = new Array(this.sens_arr.length).fill(false)
+  }
+
+  distFrom_goal(goal) {
+    //Measure of the distance between rover and goal
+    this.dv = p5.Vector.sub(this.pos, goal.pos);
+  }
+
+  drawBody() {
+    push()
+    translate(this.pos.x, this.pos.y)
+    rotate(this.vel.heading())
+    rectMode(CENTER)
+    fill(200, 20, 0)
+    this.vehicle = rect(0, 0, this.b, this.h, 5)
+    pop()
   }
 
   resetVehPos(angle) {
@@ -88,31 +105,8 @@ class Vehicle {
     }
   }
 
-  isgoingfwd(b) {
-    this.isGoingFwd = b
-  }
-
-  isgoingbwd(b) {
-    this.isGoingFwd = b
-  }
-
-  update() {
-
-    push()
-    translate(this.pos.x, this.pos.y)
-    rotate(this.vel.heading())
-
-    //Rover body
-    rectMode(CENTER)
-    fill(200, 20, 0)
-    this.vehicle = rect(0, 0, this.b, this.h, 5)
-
-    noFill()
-    noStroke()
-
-    this.turn()
-
-    if (this.isGoingFwd && this.isGoingBwd) {
+  move() {
+    if (this.isGoingFwd && this.isGoingBwd) { //in case we want to implement backwards motion
 
     } else if (this.isGoingFwd) {
       this.pos.sub(this.vel)
@@ -131,29 +125,64 @@ class Vehicle {
     } else if (this.isGoingBwd) {
       this.pos.add(this.vel)
     }
-    pop()
+  }
 
-    // //To see if the shape follows correctly the rover: TROUBLESHOOTING
-    // stroke(2)
-    // fill(0, 255, 0)
-    // beginShape();
-    // for (var v of this.vehi_surr) {
-    //   vertex(v.x, v.y)
-    // }
-    // endShape(CLOSE);
-    // noFill()
+  isgoingfwd(b) {
+    this.isGoingFwd = b
+  }
+
+  isgoingbwd(b) {
+    this.isGoingFwd = b
+  }
+
+  update(obs) {
+    //Rover body
+    this.drawBody()
+
+    noFill()
+    noStroke()
+
+    this.turn()
+
+    this.move()
+
+    //To see if the shape follows correctly the rover: TROUBLESHOOTING
+    // this.roverCollisionArea_draw()
 
   }
 
-  walls(wallVert) {
-    if (polyPoly(this.vehi_surr, wallVert)) {
-      let nPos = createVector(random(width), height - 25)
-      this.pos = createVector(nPos.x, nPos.y)
-      this.resetVehPos(this.vel.heading())
-      this.resetSensPos(this.vel.heading())
+  roverCollisionArea_draw() {
+    //To see if the shape follows correctly the rover: TROUBLESHOOTING
+    stroke(2)
+    fill(0, 255, 0)
+    beginShape();
+    for (var v of this.vehi_surr) {
+      vertex(v.x, v.y)
     }
+    endShape(CLOSE);
+    noFill()
   }
 
+  ifCollide(wallVert, obs) {
+    let col = false
+    if (polyPoly(this.vehi_surr, wallVert)) {
+      if(gameMode){
+        this.collide()
+      }
+      col = true      
+    }
+    for (let ob of obs) {
+      if (polyPoly(ob.vertices, this.vehi_surr)) {
+        if(gameMode){
+          this.collide()
+        }
+        col = true
+      }
+    }
+    return col
+  }
+
+  //This is the thing to change in case we train or not
   collide() {
     let nPos = createVector(random(width), height - 25)
     this.pos = createVector(nPos.x, nPos.y)
@@ -163,6 +192,49 @@ class Vehicle {
 
   distObs(polygVert, sensor) {
     return polyLine(polygVert, sensor[0].x, sensor[0].y, sensor[1].x, sensor[1].y)
+  }
+
+  colli_goal(goalVert) {
+    let arrived = polyPoly(goalVert, this.vehi_surr)
+    if (arrived) {
+      this.collide()
+      roverVision = false
+    }
+  }
+
+  update_sensors(obs, wallsVert) {
+    //resets the values to false
+    this.sensResutls.fill(false)
+
+    //This colors the base sensors in orange and they will be covered by the next conditions
+    for (let i = 0; i < this.sens_arr.length; i++) {
+      stroke(255, 100, 0)
+      line(this.sens_arr[i][0].x, this.sens_arr[i][0].y, this.sens_arr[i][1].x, this.sens_arr[i][1].y)
+      stroke(0)
+    }
+    for (let ob of obs) {
+      for (let i = 0; i < this.sens_arr.length; i++) {
+        //This is the check for the obstacles
+        if (this.distObs(ob.vertices, this.sens_arr[i])) {
+          stroke(0, 100, 200)
+          strokeWeight(3)
+          line(this.sens_arr[i][0].x, this.sens_arr[i][0].y, this.sens_arr[i][1].x, this.sens_arr[i][1].y)
+          stroke(0)
+          strokeWeight(1)
+          this.sensResutls[i] = true
+        }
+
+        //This is the check for the walls
+        if (this.distObs(wallsVert, this.sens_arr[i])) {
+          stroke(0, 100, 200)
+          strokeWeight(3)
+          line(this.sens_arr[i][0].x, this.sens_arr[i][0].y, this.sens_arr[i][1].x, this.sens_arr[i][1].y)
+          stroke(0)
+          strokeWeight(1)
+          this.sensResutls[i] = true
+        }
+      }
+    }
   }
 }
 
@@ -197,7 +269,8 @@ class Obstacle {
     }
   }
   render() {
-    //print(this.vertices)
+    stroke(0)
+    fill(0)
     beginShape()
     for (let vect of this.vertices) {
       vertex(vect.x, vect.y)
@@ -229,9 +302,7 @@ class Goal {
   }
   render() {
     push()
-    stroke(4)
     fill(54, 100, 200)
-
 
     beginShape();
     for (let v of this.gon) {
