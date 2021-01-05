@@ -32,7 +32,9 @@ class Vehicle {
     translate(this.pos.x, this.pos.y)
     rotate(this.vel.heading())
     rectMode(CENTER)
-    fill(200, 20, 0)
+    fill(0, 130, 200)
+    strokeWeight(1)
+    stroke(0)
     this.vehicle = rect(0, 0, this.b, this.h, 5)
     pop()
   }
@@ -166,14 +168,16 @@ class Vehicle {
   ifCollide(wallVert, obs) {
     let col = false
     if (polyPoly(this.vehi_surr, wallVert)) {
-      if(gameMode){
+      // if(gameMode){
+      {
         this.collide()
       }
-      col = true      
+      col = true
     }
     for (let ob of obs) {
       if (polyPoly(ob.vertices, this.vehi_surr)) {
-        if(gameMode){
+        // if(gameMode){
+        {
           this.collide()
         }
         col = true
@@ -208,7 +212,7 @@ class Vehicle {
 
     //This colors the base sensors in orange and they will be covered by the next conditions
     for (let i = 0; i < this.sens_arr.length; i++) {
-      stroke(255, 100, 0)
+      stroke(0, 0, 80)
       line(this.sens_arr[i][0].x, this.sens_arr[i][0].y, this.sens_arr[i][1].x, this.sens_arr[i][1].y)
       stroke(0)
     }
@@ -216,21 +220,21 @@ class Vehicle {
       for (let i = 0; i < this.sens_arr.length; i++) {
         //This is the check for the obstacles
         if (this.distObs(ob.vertices, this.sens_arr[i])) {
-          stroke(0, 100, 200)
-          strokeWeight(3)
-          line(this.sens_arr[i][0].x, this.sens_arr[i][0].y, this.sens_arr[i][1].x, this.sens_arr[i][1].y)
-          stroke(0)
-          strokeWeight(1)
+          // stroke(0, 100, 200)
+          // strokeWeight(3)
+          // line(this.sens_arr[i][0].x, this.sens_arr[i][0].y, this.sens_arr[i][1].x, this.sens_arr[i][1].y)
+          // stroke(0)
+          // strokeWeight(1)
           this.sensResutls[i] = true
         }
 
         //This is the check for the walls
         if (this.distObs(wallsVert, this.sens_arr[i])) {
-          stroke(0, 100, 200)
-          strokeWeight(3)
-          line(this.sens_arr[i][0].x, this.sens_arr[i][0].y, this.sens_arr[i][1].x, this.sens_arr[i][1].y)
-          stroke(0)
-          strokeWeight(1)
+          // stroke(0, 100, 200)
+          // strokeWeight(3)
+          // line(this.sens_arr[i][0].x, this.sens_arr[i][0].y, this.sens_arr[i][1].x, this.sens_arr[i][1].y)
+          // stroke(0)
+          // strokeWeight(1)
           this.sensResutls[i] = true
         }
       }

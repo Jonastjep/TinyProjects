@@ -13,6 +13,8 @@ class Vehicle {
     this.isGoingBwd = false;
     this.rotation = 0;
 
+    this.dv = 1000
+
     //create the collision body vertices
     this.resetVehPos(angle)
     //create the sensor array vertices
@@ -25,9 +27,13 @@ class Vehicle {
     if (brain){
       this.brain = brain.copy()
     } else {
-      this.brain = new NeuralNetwork(6,7,3)
+      this.brain = new NeuralNetwork(6,12,3)
     }
     this.fitness = 0
+  }
+
+  dispose(){
+    this.brain.dispose()
   }
 
   mutate(mutRate){
@@ -181,9 +187,6 @@ class Vehicle {
   }
 
   update(obs) {
-    //Rover body
-    this.drawBody()
-
     noFill()
     noStroke()
 
@@ -252,37 +255,40 @@ class Vehicle {
     }
   }
 
-  update_sensors(obs, wallsVert) {
+  sense_sensors(obs, wallsVert){
     //resets the values to false
     this.sensResults.fill(false)
 
     //This colors the base sensors in orange and they will be covered by the next conditions
-    for (let i = 0; i < this.sens_arr.length; i++) {
-      stroke(255, 100, 0)
-      line(this.sens_arr[i][0].x, this.sens_arr[i][0].y, this.sens_arr[i][1].x, this.sens_arr[i][1].y)
-      stroke(0)
-    }
     for (let ob of obs) {
       for (let i = 0; i < this.sens_arr.length; i++) {
         //This is the check for the obstacles
         if (this.distObs(ob.vertices, this.sens_arr[i])) {
-          stroke(0, 100, 200)
-          strokeWeight(3)
-          line(this.sens_arr[i][0].x, this.sens_arr[i][0].y, this.sens_arr[i][1].x, this.sens_arr[i][1].y)
-          stroke(0)
-          strokeWeight(1)
           this.sensResults[i] = true
         }
 
         //This is the check for the walls
         if (this.distObs(wallsVert, this.sens_arr[i])) {
-          stroke(0, 100, 200)
-          strokeWeight(3)
-          line(this.sens_arr[i][0].x, this.sens_arr[i][0].y, this.sens_arr[i][1].x, this.sens_arr[i][1].y)
-          stroke(0)
-          strokeWeight(1)
           this.sensResults[i] = true
         }
+      }
+    }
+  }
+
+  draw_sensors() {
+    //This colors the base sensors in orange and they will be covered by the next conditions
+    for (let i = 0; i < this.sens_arr.length; i++) {
+      stroke(100, 100, 180)
+      line(this.sens_arr[i][0].x, this.sens_arr[i][0].y, this.sens_arr[i][1].x, this.sens_arr[i][1].y)
+      stroke(0)
+    }
+    for (let i = 0; i < this.sens_arr.length; i++) {
+      if (this.sensResults[i]){
+        stroke(0, 100, 200)
+        strokeWeight(3)
+        line(this.sens_arr[i][0].x, this.sens_arr[i][0].y, this.sens_arr[i][1].x, this.sens_arr[i][1].y)
+        stroke(0)
+        strokeWeight(1)
       }
     }
   }

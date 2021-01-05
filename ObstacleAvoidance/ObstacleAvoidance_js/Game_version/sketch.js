@@ -4,7 +4,7 @@ let rover
 let obs
 let wallsVert
 
-let popSize = 10
+let popSize = 1
 
 //This is for the human playable game
 let roverVision = false
@@ -61,9 +61,9 @@ function draw() {
 
     //verifying if rover has collided with the walls and obstacles
     let col = rovers[i].ifCollide(wallsVert, obs)
-    if(!gameMode && col){
-      rovers.splice(i,1)
-    }
+    // if(!gameMode && col){
+    //   rovers.splice(i,1)
+    // }
   }
 
 

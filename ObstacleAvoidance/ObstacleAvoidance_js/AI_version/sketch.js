@@ -1,13 +1,13 @@
 let gameMode = false
 
 //this timer limits the time a generation can survive
-var timer = 10000
-var timerLen = 10000
+var timer = 100000
+var timerLen = timer
 
 let obs = []
 let wallsVert
 
-let popSize = 50
+let popSize = 25
 
 //Array where population is stored
 let rovers = new Array(popSize)
@@ -19,8 +19,12 @@ let roverVision = false
 
 let genNb = 0
 
+//Slider to speed up simulation
+let speedSlider
+
 function setup() {
   createCanvas(800, 800);
+  tf.setBackend('cpu')
 
   //This checks that the game mode is unavailable if there is more than one rover
   if (gameMode){
@@ -29,7 +33,7 @@ function setup() {
   }
 
   for (i = 0; i < popSize; i++) {
-    rovers[i] = new Vehicle(random(width), height - 25, random(0, TWO_PI))
+    rovers[i] = new Vehicle(random(20, width-20), height - 25, random(0, TWO_PI))
   }
 
   obs = []
@@ -50,9 +54,65 @@ function setup() {
     createVector(width, height),
     createVector(0, height),
   ]
+
+  speedSlider = createSlider(1,30,30)
+
+  //sets the first value of the timer
+  timer = timer/speedSlider.value()
 }
 
 function draw() {
+  // making multiple cycles in one draw
+  const cycles = speedSlider.value()
+  let scaledTimerLen = timerLen / cycles
+
+
+  for (var n = 0; n < cycles; n++) {
+
+    for (let i = 0; i < rovers.length; i++) {
+      //Measure of the distance between rover and goal
+      rovers[i].distFrom_goal(goal)
+
+      //Makes the choices with the neural network
+      if(!gameMode){
+        rovers[i].think()
+      }
+
+      //Checking if the sensors sence the walls
+      rovers[i].sense_sensors(obs, wallsVert)
+
+      //drawing the current state of rover -> moved to make the speed slider
+      // rovers[i].draw_sensors()
+      rovers[i].update()
+
+      //checking if arrived at goal
+      let gotToGoal = rovers[i].colli_goal(goal.gon)
+      if(!gameMode && gotToGoal){
+        savedRovers.push(rovers.splice(i,1)[0])
+      }
+
+      //verifying if rover has collided with the walls and obstacles
+      let col = rovers[i].ifCollide(wallsVert, obs)
+      if(!gameMode && col){
+        savedRovers.push(rovers.splice(i,1)[0])
+      }
+    }
+
+    //If no more rovers, creates the new generation with different map
+    if (rovers.length === 0 || (timer < millis())) {
+      obs = []
+      for (let i = 0; i < floor(random(15, 25)); i++) {
+        obs.push(new Obstacle(createVector(random(width), random(100, width - 100))))
+      }
+      for (rovAlive of rovers){
+        savedRovers.push(rovAlive)
+      }
+      nextGen()
+      timer = scaledTimerLen + millis()
+    }
+  }
+  //################# DRAWING AREA ######################
+
   background("#f1f1f1")
   fill(0)
 
@@ -63,32 +123,10 @@ function draw() {
     ob.render()
   }
 
-  for (let i = 0; i < rovers.length; i++) {
-    //Measure of the distance between rover and goal
-    rovers[i].distFrom_goal(goal)
-
-    //Checking if the sensors sence the walls
-    rovers[i].update_sensors(obs, wallsVert)
-
-    //Makes the choices with the neural network
-    if(!gameMode){
-      rovers[i].think()
-    }
-
+  for (let rover of rovers){
     //drawing the current state of rover
-    rovers[i].update()
-
-    //checking if arrived at goal
-    let gotToGoal = rovers[i].colli_goal(goal.gon)
-    if(!gameMode && gotToGoal){
-      savedRovers.push(rovers.splice(i,1)[0])
-    }
-
-    //verifying if rover has collided with the walls and obstacles
-    let col = rovers[i].ifCollide(wallsVert, obs)
-    if(!gameMode && col){
-      savedRovers.push(rovers.splice(i,1)[0])
-    }
+    rover.draw_sensors()
+    rover.drawBody()
   }
 
   //Prints the info of the only rover
@@ -96,23 +134,11 @@ function draw() {
     printInfo()
   }
 
-  //If no more rovers, creates the new generation with different map
-  if (rovers.length === 0 || (timer < millis())) {
-    obs = []
-    for (let i = 0; i < floor(random(15, 25)); i++) {
-      obs.push(new Obstacle(createVector(random(width), random(100, width - 100))))
-    }
-    for (rovAlive of rovers){
-      savedRovers.push(rovAlive)
-    }
-    console.log(savedRovers)
-    nextGen()
-    timer = timerLen + millis()
-  }
   strokeWeight(1)
   stroke(150,0,0)
   text("Generation: " + genNb, 10, 20)
 }
+
 
 function createAndDrawCutoutShape(dim, rover) {
   stroke(255, 0, 0);
