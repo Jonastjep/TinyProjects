@@ -40,18 +40,22 @@ function pickOne(){
   let children = []
   for(let i = 0; i < popSize; i++){
     children.push(new Vehicle(random(20, width-20), height - 25, random(0, TWO_PI),chosenRover.brain))
-    children[i].mutate(0.3)
+    children[i].mutate(0.1)
   }
   return children
 }
 
 function calculateFitness(){
+  // Normalize the values
   let sum = 0
   for (let rover of savedRovers){
-    //dv is the distance from goal
-    sum += rover.dv.mag()
+    rover.calculateFitness()
+    // console.log(rover.fitness)
+    sum += rover.fitness
   }
   for (let rover of savedRovers){
-    rover.fitness = 1 - rover.dv.mag() / sum
+    rover.fitness = rover.fitness / sum
+    //console.log(rover.fitness)
   }
+//console.log("_______________________")
 }

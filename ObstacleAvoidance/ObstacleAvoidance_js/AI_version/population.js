@@ -9,7 +9,7 @@ class Vehicle {
     this.b = 15;
     this.sensRange = 30
 
-    this.isGoingFwd = false;
+    this.isGoingFwd = true;
     this.isGoingBwd = false;
     this.rotation = 0;
 
@@ -40,6 +40,10 @@ class Vehicle {
     this.brain.mutate(mutRate)
   }
 
+  calculateFitness(){
+    this.fitness = 1 / this.dv.mag()
+  }
+
   //This is the function that takes in the inputs, passes through the nn
   // and then returns what to do and does it
   think(){
@@ -56,11 +60,16 @@ class Vehicle {
     //print(input)
     let output = this.brain.predict(input)
     //print(output)
-    if (output[0]>0.5) {
+    if(initVelCheck.checked){
+      if (output[0]>0.5) {
+        this.isgoingfwd(true)
+      }else {
+        this.isgoingfwd(false)
+      }
+    }else{
       this.isgoingfwd(true)
-    }else {
-      this.isgoingfwd(false)
     }
+    
     if (output[1]>0.5) {
       this.setRota(5 * PI / 180)
     }else {

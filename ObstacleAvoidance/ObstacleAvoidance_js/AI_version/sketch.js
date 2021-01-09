@@ -7,7 +7,7 @@ var timerLen = timer
 let obs = []
 let wallsVert
 
-let popSize = 25
+let popSize = 100
 
 //Array where population is stored
 let rovers = new Array(popSize)
@@ -21,6 +21,10 @@ let genNb = 0
 
 //Slider to speed up simulation
 let speedSlider
+
+let initVelCheck
+let randomTrackCheck
+let noTimer
 
 function setup() {
   createCanvas(800, 800);
@@ -56,6 +60,11 @@ function setup() {
   ]
 
   speedSlider = createSlider(1,30,30)
+
+
+  initVelCheck = select("#initVel").elt
+  randomTrackCheck = select("#rdmTerr").elt
+  noTimer = select("#noTimer").elt
 
   //sets the first value of the timer
   timer = timer/speedSlider.value()
@@ -99,16 +108,38 @@ function draw() {
     }
 
     //If no more rovers, creates the new generation with different map
-    if (rovers.length === 0 || (timer < millis())) {
-      obs = []
-      for (let i = 0; i < floor(random(15, 25)); i++) {
-        obs.push(new Obstacle(createVector(random(width), random(100, width - 100))))
+    if(!noTimer.checked){
+      if (rovers.length === 0 || (timer < millis())) {
+        for (rovAlive of rovers){
+          savedRovers.push(rovAlive)
+        }
+        nextGen()
+        timer = scaledTimerLen + millis()
+
+        if(randomTrackCheck.checked){
+          obs = []
+          for (let i = 0; i < floor(random(15, 25)); i++) {
+            obs.push(new Obstacle(createVector(random(width), random(100, width - 100))))
+          }
+          goal = new Goal(pos = createVector(random(width), 18))
+        }
       }
-      for (rovAlive of rovers){
-        savedRovers.push(rovAlive)
+    } else{
+      if (rovers.length === 0) {
+        for (rovAlive of rovers){
+          savedRovers.push(rovAlive)
+        }
+        nextGen()
+        timer = scaledTimerLen + millis()
+
+        if(randomTrackCheck.checked){
+          obs = []
+          for (let i = 0; i < floor(random(15, 25)); i++) {
+            obs.push(new Obstacle(createVector(random(width), random(100, width - 100))))
+          }
+          goal = new Goal(pos = createVector(random(width), 18))
+        }
       }
-      nextGen()
-      timer = scaledTimerLen + millis()
     }
   }
   //################# DRAWING AREA ######################
