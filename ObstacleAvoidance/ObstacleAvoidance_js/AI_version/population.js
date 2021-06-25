@@ -13,7 +13,7 @@ class Vehicle {
     this.isGoingBwd = false;
     this.rotation = 0;
 
-    this.dv = 1000
+    this.dv = 200
 
     //create the collision body vertices
     this.resetVehPos(angle)
@@ -29,7 +29,7 @@ class Vehicle {
     } else {
       this.brain = new NeuralNetwork(6,12,3)
     }
-    this.fitness = 0
+    this.fitness = 1000
   }
 
   dispose(){
@@ -41,7 +41,7 @@ class Vehicle {
   }
 
   calculateFitness(){
-    this.fitness = 1 / this.dv.mag()
+    this.fitness += 100 * 1 / this.dv.mag()
   }
 
   //This is the function that takes in the inputs, passes through the nn
@@ -65,18 +65,21 @@ class Vehicle {
         this.isgoingfwd(true)
       }else {
         this.isgoingfwd(false)
+        this.fitness -= 0.1
       }
     }else{
       this.isgoingfwd(true)
     }
-    
+
     if (output[1]>0.5) {
       this.setRota(5 * PI / 180)
+      this.fitness -= 0.1
     }else {
       this.setRota(0)
     }
     if (output[2]>0.5) {
       this.setRota(-5 * PI / 180)
+      this.fitness -= 1
     }else {
       this.setRota(0)
     }

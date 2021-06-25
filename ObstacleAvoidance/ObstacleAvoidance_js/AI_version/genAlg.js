@@ -54,8 +54,11 @@ function calculateFitness(){
     sum += rover.fitness
   }
   for (let rover of savedRovers){
+    if(rover.fitness<=0){
+      rover.fitness = 0
+    }
     rover.fitness = rover.fitness / sum
-    //console.log(rover.fitness)
+    // console.log(rover.fitness)
   }
-//console.log("_______________________")
+// console.log("_______________________")
 }

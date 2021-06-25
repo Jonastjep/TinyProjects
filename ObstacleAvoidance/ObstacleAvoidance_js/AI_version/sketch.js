@@ -7,7 +7,7 @@ var timerLen = timer
 let obs = []
 let wallsVert
 
-let popSize = 100
+let popSize = 10
 
 //Array where population is stored
 let rovers = new Array(popSize)
@@ -86,6 +86,11 @@ function draw() {
       if(!gameMode){
         rovers[i].think()
       }
+      // console.log(rovers[i].fitness)
+      if(rovers[i].fitness < 0){
+        savedRovers.push(rovers.splice(i,1)[0])
+        continue
+      }
 
       //Checking if the sensors sence the walls
       rovers[i].sense_sensors(obs, wallsVert)
@@ -97,7 +102,9 @@ function draw() {
       //checking if arrived at goal
       let gotToGoal = rovers[i].colli_goal(goal.gon)
       if(!gameMode && gotToGoal){
+        rovers[i].fitness += 200
         savedRovers.push(rovers.splice(i,1)[0])
+        continue
       }
 
       //verifying if rover has collided with the walls and obstacles
@@ -105,6 +112,7 @@ function draw() {
       if(!gameMode && col){
         savedRovers.push(rovers.splice(i,1)[0])
       }
+
     }
 
     //If no more rovers, creates the new generation with different map
